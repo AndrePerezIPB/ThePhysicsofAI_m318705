@@ -1,33 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class FireShell : MonoBehaviour {
 
     public GameObject bullet;
     public GameObject turret;
-    public GameObject enemy;
+    public Drive enemy;
     public Transform turretBase;
     float speed = 15.0f;
-    float rotSpeed = 2.0f;
+    float rotSpeed = 5.0f;
+    float moveSpeed = 1.0f;
+    //float coolDown = 0.02f;
 
     void CreateBullet() {
 
-        Instantiate(bullet, turret.transform.position, turret.transform.rotation);
+        GameObject shell = Instantiate(bullet, turret.transform.position, turret.transform.rotation);
+        shell.GetComponent<Rigidbody>().velocity = speed * turretBase.forward;
     }
 
-    void RotateTurret()
+    float? RotateTurret()
     {
-        float? angle = CalculateAngle(true);
+        float? angle = CalculateAngle(false);
         if (angle != null)
         {
             turretBase.localEulerAngles = new Vector3(360f - (float)angle, 0f, 0f);
         }
+        return angle;
     }
 
     float? CalculateAngle(bool low)
     {
-        Vector3 targetDir = enemy.transform.position - this.transform.position;
+        //Vector3 targetDir = enemy.transform.position - this.transform.position;
+        Vector3 targetDir = enemy.transGun.position - turret.transform.position;
         float y = targetDir.y;
         targetDir.y = 0f;
         float x = targetDir.magnitude;
@@ -61,10 +67,34 @@ public class FireShell : MonoBehaviour {
         Vector3 direction = (enemy.transform.position - this.transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         this.transform.rotation = Quaternion.Slerp(this.transform.rotation, lookRotation, Time.deltaTime * rotSpeed);
-        RotateTurret();
-        if (Input.GetKeyDown(KeyCode.Space)) 
+        float? angle = RotateTurret();
+        if (angle != null)
         {
             CreateBullet();
         }
+        else
+        {
+            this.transform.Translate(0, 0, Time.deltaTime * moveSpeed);
+        }
+
+        //A version with cooldown between shells
+        //if (angle != null)
+        //{
+        //    if(coolDown >= 0.25f)
+        //    {
+        //        CreateBullet();
+        //        coolDown = 0;
+        //    }
+        //    else
+        //    {
+        //        coolDown += Time.deltaTime;
+        //    }
+        //}
+
+        //A version to manually shoot with the space bar
+        //if (Input.GetKeyDown(KeyCode.Space)) 
+        //{
+        //    CreateBullet();
+        //}
     }
 }
