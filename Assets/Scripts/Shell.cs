@@ -10,7 +10,7 @@ public class Shell : MonoBehaviour {
     float mass = 30.0f;
     float force = 4.0f;
     float drag = 1.0f;
-    float gravity = -9.8f;
+    float gravity = -9.8f; //This is a force, Newtons
     float gAccel;
     float acceleration;
 
